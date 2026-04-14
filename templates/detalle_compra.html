@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block contenido %}
+
+<h2>📄 Detalle de Compra</h2>
+
+<div class="card">
+    <p><strong>Factura:</strong> {{ compra[7] or "Sin factura" }}</p>
+    <p><strong>Método:</strong> {{ compra[8] or "Sin método" }}</p>
+    <p><strong>Fecha:</strong> {{ compra[6] or "Sin fecha" }}</p>
+    
+</div>
+
+<h3>📦 Productos</h3>
+
+<table>
+    <tr>
+        <th>Referencia</th>
+        <th>Nombre</th>
+        <th>Cantidad</th>
+        <th>Costo</th>
+        <th>Subtotal</th>
+    </tr>
+
+    {% for p in productos %}
+    <tr>
+        <td>{{ p[2] }}</td>
+        <td>{{ p[3] }}</td>
+        <td>{{ p[4] }}</td>
+        <td>${{ "{:,.0f}".format(p[5]) }}</td>
+        <td>${{ "{:,.0f}".format(p[4] * p[5]) }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h3>💰 Total: ${{ "{:,.0f}".format(compra[5] if compra[5] else 0) }}</h3>
+
+<br>
+
+<a href="/compras" class="btn-volver">← Volver</a>
+
+{% endblock %}
+``

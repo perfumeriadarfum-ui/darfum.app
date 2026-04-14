@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<h2>💼 Caja</h2>
+
+<div class="grid-caja">
+
+    <div class="card-caja ingreso">
+        <h3>💰 Ingresos</h3>
+        <p>${{ "{:,.0f}".format(ingresos) }}</p>
+    </div>
+
+    <div class="card-caja egreso">
+        <h3>💸 Egresos</h3>
+        <p>${{ "{:,.0f}".format(egresos) }}</p>
+    </div>
+
+    <div class="card-caja total">
+        <h3>🏦 Total en caja</h3>
+        <p>${{ "{:,.0f}".format(total) }}</p>
+    </div>
+
+</div>
+
+{% endblock %}

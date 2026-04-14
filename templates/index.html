@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<h1>📦 Inventario</h1>
+
+<a href="/nuevo_producto">
+    <button class="btn-main">➕ Agregar Producto</button>
+</a>
+
+<hr>
+
+<h2>Productos</h2>
+
+<h3 class="total-inventario">
+    💰 Total inventario: $ {{ "{:,.0f}".format(total) }}
+</h3>
+
+<!-- 🔍 BUSCADOR -->
+<input type="text" id="buscador" placeholder="🔎 Buscar producto..." class="input-busqueda">
+
+<select id="filtroStock" class="input-busqueda">
+    <option value="">Todos</option>
+    <option value="con">Con stock</option>
+    <option value="sin">Sin stock</option>
+</select>
+
+<select id="filtroCategoria" class="input-busqueda">
+    <option value="">Todas las categorías</option>
+    <option value="original">Original</option>
+    <option value="replica">Replica</option>
+    <option value="accesorio">Accesorio</option>
+</select>
+
+<select id="filtroGenero" class="input-busqueda">
+    <option value="">Todos los géneros</option>
+    <option value="hombre">Hombre</option>
+    <option value="mujer">Mujer</option>
+</select>
+
+<div class="top-bar">
+    <a href="/movimientos" class="btn-movimientos-global">
+        📊 Ver Movimientos
+    </a>
+</div>
+
+<!-- 📦 PRODUCTOS -->
+<div class="contenedor-productos">
+
+    {% for p in productos %}
+
+    <div class="card-producto producto"
+        data-categoria="{{ p[5]|lower }}"
+        data-genero="{{ p[6]|lower }}"
+        data-stock="{{ p[4] }}">
+
+        <img src="{{ url_for('static', filename='uploads/' + (p[8] or 'default.png')) }}" class="img-producto">
+
+                <!-- referencia -->
+        <small class="ref">Ref: {{ p[1] }}</small>
+
+        <!-- nombre -->
+        <h3>{{ p[2] }}</h3>
+
+        <!-- precio -->
+        <p class="precio">$ {{ "{:,.0f}".format(p[3]|float) }}</p>
+
+        <!-- categoria -->
+        <p>Categoría: {{ p[6] }}</p>
+
+        <!-- genero -->
+        <p>Género: {{ p[7] }}</p>
+
+        <!-- stock -->
+        <p>
+        {% if p[5]|int <= 3 %}
+        ⚠ Bajo stock ({{ p[5] }})
+        {% else %}
+        Stock: {{ p[5] }}
+        {% endif %}
+        </p>
+
+        <div class="acciones">
+            <a href="/editar_producto/{{ p[0] }}" class="btn editar">Editar</a>
+
+            <button class="btn eliminar" onclick="abrirModal('{{ p[0] }}')">
+                Eliminar
+            </button>
+        </div>
+
+    </div>
+
+    {% endfor %}
+
+</div>
+
+<!-- 🔥 MODAL -->
+<div id="modalEliminar" class="modal">
+    <div class="modal-contenido">
+        <h3>⚠ Confirmar eliminación</h3>
+        <p>Esta acción no se puede deshacer</p>
+
+        <div class="modal-botones">
+            <button onclick="cerrarModal()" class="btn cancelar">Cancelar</button>
+            <a id="btnConfirmarEliminar" class="btn eliminar">Eliminar</a>
+        </div>
+    </div>
+</div>
+
+<!-- 🔥 SCRIPT -->
+<script>
+
+// =========================
+// MODAL
+// =========================
+function abrirModal(id) {
+    const modal = document.getElementById("modalEliminar");
+    const btn = document.getElementById("btnConfirmarEliminar");
+
+    btn.href = "/eliminar_producto/" + id;
+
+    modal.style.display = "flex";
+}
+
+function cerrarModal() {
+    document.getElementById("modalEliminar").style.display = "none";
+}
+
+window.onclick = function(e) {
+    const modal = document.getElementById("modalEliminar");
+    if (e.target == modal) {
+        modal.style.display = "none";
+    }
+}
+
+// =========================
+// FILTROS
+// =========================
+const buscador = document.getElementById("buscador");
+const filtroCategoria = document.getElementById("filtroCategoria");
+const filtroGenero = document.getElementById("filtroGenero");
+const filtroStock = document.getElementById("filtroStock");
+
+function filtrarTodo() {
+    const texto = buscador.value.toLowerCase();
+    const cat = filtroCategoria.value.toLowerCase();
+    const gen = filtroGenero.value.toLowerCase();
+    const stockFiltro = filtroStock.value;
+
+    document.querySelectorAll(".producto").forEach(p => {
+        const nombre = p.innerText.toLowerCase();
+        const pCat = p.dataset.categoria || "";
+        const pGen = p.dataset.genero || "";
+        const pStock = parseInt(p.dataset.stock || 0);
+
+        let okTexto = nombre.includes(texto);
+        let okCat = !cat || pCat === cat;
+        let okGen = !gen || pGen === gen;
+        let okStock = true;
+
+        if (stockFiltro === "con") okStock = pStock > 0;
+        if (stockFiltro === "sin") okStock = pStock === 0;
+
+        p.style.display = (okTexto && okCat && okGen && okStock)
+            ? "block"
+            : "none";
+    });
+}
+
+buscador.addEventListener("input", filtrarTodo);
+filtroCategoria.addEventListener("change", filtrarTodo);
+filtroGenero.addEventListener("change", filtrarTodo);
+filtroStock.addEventListener("change", filtrarTodo);
+
+</script>
+
+{% endblock %}

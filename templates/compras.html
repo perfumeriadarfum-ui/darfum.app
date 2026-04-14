@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<h2>📦 Compras</h2>
+
+<button onclick="abrirModal()" class="btn-main">➕ Nueva compra</button>
+
+<hr>
+
+<h3>📋 Historial de compras</h3>
+
+<table>
+    <tr>
+        <th>Factura</th>
+        <th>Total</th>
+        <th>Fecha</th>
+        <th>Acciones</th>
+    </tr>
+
+    {% for c in compras %}
+    <tr>
+        <td>{{ c[1] }}</td>
+        <td>${{ "{:,.0f}".format(c[5]) }}</td>
+        <td>{{ c[6] }}</td>
+        <td>
+            <a href="/detalle_compra/{{ c[0] }}">👁</a>
+            <a href="/eliminar_compra/{{ c[0] }}">🗑</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<!-- 🔥 MODAL -->
+<div id="modalCompra" class="modal">
+    <div class="form-compra">
+
+        <h2>🧾 Nueva Compra</h2>
+
+        <form method="POST" action="{{ url_for('agregar_compra') }}">
+
+            <input type="text" name="factura" placeholder="N° Factura" required>
+
+            <select name="metodo_pago" required>
+                <option value="efectivo">Efectivo</option>
+                <option value="transferencia">Transferencia</option>
+            </select>
+
+            <hr>
+
+            <h3>📦 Productos</h3>
+
+            <div id="productos"></div>
+
+            <button type="button" onclick="agregarProducto()">+ Agregar producto</button>
+
+            <br><br>
+
+            <h3>💰 Total: $<span id="total">0</span></h3>
+
+            <button type="submit">💾 Guardar compra</button>
+            <button type="button" onclick="cerrarModal()">❌ Cancelar</button>
+
+        </form>
+    </div>
+</div>
+
+<!-- 🔥 JS LIMPIO Y SIN ERRORES -->
+<script>
+
+function abrirModal() {
+    document.getElementById("modalCompra").style.display = "flex";
+}
+
+function cerrarModal() {
+    document.getElementById("modalCompra").style.display = "none";
+}
+
+// ✅ AGREGAR PRODUCTOS
+function agregarProducto() {
+    const contenedor = document.getElementById("productos");
+
+    const div = document.createElement("div");
+    div.classList.add("producto-card");
+
+    div.innerHTML = `
+        <div class="header-producto">
+            <strong>Producto</strong>
+            <button type="button" onclick="this.parentElement.parentElement.remove()">❌</button>
+        </div>
+
+        <div class="fila">
+            <input type="text" name="referencia[]" placeholder="Referencia" required onblur="buscarProducto(this)">
+            <input type="text" name="nombre[]" placeholder="Nombre">
+        </div>
+
+        <div class="fila">
+            <input type="number" name="cantidad[]" placeholder="Cantidad" required oninput="calcularTotal()">
+            <input type="number" name="costo[]" placeholder="Costo" step="0.01" required oninput="calcularTotal()">
+        </div>
+
+        <div class="fila">
+            <select name="categoria[]">
+                <option value="original">Original</option>
+                <option value="replica">Replica</option>
+                <option value="accesorio">Accesorio</option>
+            </select>
+
+            <select name="genero[]">
+                <option value="hombre">Hombre</option>
+                <option value="mujer">Mujer</option>
+                <option value="unisex">Unisex</option>
+            </select>
+        </div>
+    `;
+
+    contenedor.appendChild(div);
+}
+
+// ✅ CALCULAR TOTAL (ARREGLADO)
+function calcularTotal() {
+    let cantidades = document.getElementsByName("cantidad[]");
+    let costos = document.getElementsByName("costo[]");
+
+    let total = 0;
+
+    for (let i = 0; i < cantidades.length; i++) {
+        let c = parseFloat(cantidades[i].value) || 0;
+        let p = parseFloat(costos[i].value) || 0;
+        total += c * p;
+    }
+
+    document.getElementById("total").innerText = total.toLocaleString();
+}
+
+// ✅ AUTOCOMPLETAR PRODUCTO (ARREGLADO)
+function buscarProducto(input) {
+    const ref = input.value;
+
+    fetch(`/buscar_producto/${ref}`)
+        .then(res => res.json())
+        .then(data => {
+
+            const contenedor = input.parentElement;
+
+            if (data.existe) {
+                contenedor.querySelector('[name="nombre[]"]').value = data.nombre;
+                contenedor.querySelector('[name="categoria[]"]').value = data.categoria;
+                contenedor.querySelector('[name="genero[]"]').value = data.genero;
+            }
+        });
+}
+
+function abrirModal() {
+    document.getElementById("modalCompra").style.display = "flex";
+    document.body.style.overflow = "hidden"; // 🔥 bloquea fondo
+}
+
+function cerrarModal() {
+    document.getElementById("modalCompra").style.display = "none";
+    document.body.style.overflow = "auto"; // 🔥 devuelve scroll
+}
+
+</script>
+
+{% endblock %}

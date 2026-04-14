@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<h2>📊 Reportes</h2>
+
+<div class="grid-reportes">
+
+    <div class="card-reporte">
+        <h3>💰 Ventas</h3>
+        <p>${{ "{:,.0f}".format(ventas) }}</p>
+    </div>
+
+    <div class="card-reporte">
+        <h3>💸 Gastos</h3>
+        <p>${{ "{:,.0f}".format(gastos) }}</p>
+    </div>
+
+    <div class="card-reporte">
+        <h3>🛒 Compras</h3>
+        <p>${{ "{:,.0f}".format(compras) }}</p>
+    </div>
+
+    <div class="card-reporte">
+        <h3>💳 Abonos</h3>
+        <p>${{ "{:,.0f}".format(abonos) }}</p>
+    </div>
+
+    <div class="card-reporte total">
+        <h3>📈 Ganancia</h3>
+        <p>${{ "{:,.0f}".format(ganancia) }}</p>
+    </div>
+
+</div>
+
+{% endblock %}

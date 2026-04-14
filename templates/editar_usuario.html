@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+<h2>Editar Usuario</h2>
+
+<form method="POST">
+    <input type="text" name="username" value="{{ usuario[1] }}" required>
+    <input type="text" name="password" value="{{ usuario[2] }}" required>
+    <input type="text" name="rol" value="{{ usuario[3] }}" required>
+
+    <button type="submit">Guardar</button>
+</form>
+
+{% endblock %}

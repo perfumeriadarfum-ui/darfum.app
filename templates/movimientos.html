@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<div class="contenedor-movimientos">
+
+    <div class="header-movimientos">
+        <h2>📊 Movimientos de Inventario</h2>
+
+        <!-- 🔙 BOTÓN VOLVER -->
+        <a href="/" class="btn-volver">⬅ Volver</a>
+    </div>
+
+    <div class="tabla-movimientos">
+        <table>
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Tipo</th>
+                    <th>Cantidad</th>
+                    <th>Fecha</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for m in movimientos %}
+                <tr>
+                    <td>{{ m[0] }}</td>
+
+                    <!-- COLOR DINÁMICO -->
+                    <td class="{{ 'entrada' if m[1]=='entrada' else 'salida' }}">
+                        {{ m[1] }}
+                    </td>
+
+                    <td>{{ m[2] }}</td>
+                    <td>{{ m[3] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}

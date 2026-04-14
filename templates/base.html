@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Darfum</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+
+    {% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="alerta">
+      {% for msg in messages %}
+        <p>{{ msg }}</p>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<div class="layout">
+
+    <!-- MENÚ LATERAL -->
+    <aside class="sidebar">
+        <h2 class="logo">Darfum</h2>
+
+        <a href="/home" class="menu-item">🏠 Inicio</a>
+        <div class="menu-item" onclick="toggleSubmenu()">
+    📊 Contabilidad ⬇
+</div>
+
+<div id="submenuContabilidad" class="submenu">
+
+    <a href="/contabilidad">📊 Dashboard</a>
+    <a href="/gastos">💸 Gastos</a>
+    <a href="/compras">🛒 Compras</a>
+    <a href="/abonos">💰 Pagos</a>
+    <a href="/cxc">🧾 cxc</a>
+    <a href="/caja">💼 Caja</a>
+    <a href="/ajustes">⚖️ Ajustes</a>
+    <a href="/patrimonio">🏢 Patrimonio</a>
+    <a href="/reportes">📊 Reportes</a>
+
+</div>
+        <a href="/" class="menu-item">📦 Inventario</a>
+        <a href="/ventas" class="menu-item">💰 Ventas</a>
+        <a href="/historial" class="menu-item">📊 Historial</a>
+        <a href="/usuarios" class="menu-item">👤 Usuarios</a>
+        <a href="/clientes" class="menu-item">🧑‍🤝‍🧑 clientes</a>
+
+        <a href="/logout" class="menu-item logout">🚪 Cerrar sesión</a>
+    </aside>
+
+    <!-- CONTENIDO -->
+    <main class="content">
+        {% block contenido %}
+        {% endblock %}
+    </main>
+
+</div>
+
+<script>
+function toggleSubmenu(){
+    const menu = document.getElementById("submenuContabilidad");
+
+    if(menu.style.display === "block"){
+        menu.style.display = "none";
+    } else {
+        menu.style.display = "block";
+    }
+}
+</script>
+
+</body>
+</html>

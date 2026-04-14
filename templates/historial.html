@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block contenido %}
+
+<h1>📊 Historial de ventas</h1>
+
+<!-- 🔍 FILTRO POR FECHA -->
+<form method="GET" style="margin-bottom:15px;">
+    <input type="date" name="fecha" value="{{ fecha }}">
+    <button type="submit">🔍 Buscar</button>
+</form>
+
+<!-- 💰 TOTAL DEL DÍA -->
+<h3>💰 Total del día: ${{ "{:,.0f}".format(total_dia) }}</h3>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>Cliente</th>
+            <th>Total</th>
+            <th>Tipo</th>
+            <th>Método</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for venta in ventas %}
+        <tr>
+            <td>{{ venta[1] }}</td>
+            <td>{{ venta[2] }}</td>
+            <td>${{ "{:,.0f}".format(venta[3]) }}</td>
+            <td>{{ venta[4] }}</td>
+            <td>{{ venta[5] }}</td>
+
+            <td>
+                <!-- ELIMINAR -->
+                <button onclick="eliminar({{ venta[0] }})">🗑</button>
+
+                <!-- EDITAR -->
+                <button onclick="editar(
+                    {{ venta[0] }},
+                    '{{ venta[2] }}',
+                    '{{ venta[4] }}',
+                    '{{ venta[5] }}'
+                )">✏️</button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+window.eliminar = async function(id) {
+    if (!confirm("Eliminar venta?")) return;
+
+    await fetch(/eliminar_venta/${id}, {
+        method: "POST"
+    });
+
+    location.reload();
+}
+
+window.editar = async function(id, clienteActual, tipoActual, metodoActual) {
+
+    const cliente = prompt("Cliente:", clienteActual);
+    if (!cliente) return;
+
+    const tipo = prompt("Tipo (contado/credito):", tipoActual);
+    if (!tipo) return;
+
+    const metodo = prompt("Método (efectivo/transferencia):", metodoActual);
+    if (!metodo) return;
+
+    await fetch(`/editar_venta/${id}`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            cliente: cliente,
+            tipo_venta: tipo,
+            metodo_pago: metodo
+        })
+    });
+
+    location.reload();
+}
+</script>
+
+{% endblock %}

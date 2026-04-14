@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<div class="card-form">
+
+    <h2>✨ Agregar Producto Nuevo</h2>
+    <p>Completa los datos del producto</p>
+
+    <form action="/guardar_producto" method="POST" enctype="multipart/form-data">
+
+        <!-- REFERENCIA -->
+        <label>Referencia</label>
+        <input type="text" name="referencia" placeholder="Ej: VERS-001" required>
+
+        <!-- NOMBRE -->
+        <label>Nombre del producto</label>
+        <input type="text" name="nombre" placeholder="Ej: Perfume XYZ" required>
+
+        <!-- COMPRA -->
+        <label>Precio compra</label>
+        <input type="number" name="compra" id="compra" required>
+
+        <!-- GANANCIA -->
+        <label>Ganancia (%)</label>
+        <input type="number" name="ganancia" id="ganancia" value="30">
+
+        <!-- PRECIO VENTA (VISIBLE) -->
+        <label>Precio de venta</label>
+        <input type="text" id="venta" readonly>
+
+        <!-- PRECIO REAL (OCULTO PARA BACKEND) -->
+        <input type="hidden" name="venta" id="venta_real">
+
+        <!-- STOCK -->
+        <label>Stock</label>
+        <input type="number" name="stock" required>
+
+        <!-- IMAGEN -->
+        <label>Imagen</label>
+        <input type="file" name="imagen" required>
+
+        <!-- CATEGORIA -->
+        <label>Categoría</label>
+        <select name="categoria">
+            <option value="original">Original</option>
+            <option value="replica">Replica</option>
+            <option value="accesorio">Accesorio</option>
+        </select>
+
+        <!-- GENERO -->
+        <label>Género</label>
+        <select name="genero">
+            <option value="hombre">Hombre</option>
+            <option value="mujer">Mujer</option>
+            <option value="unisex">Unisex</option>
+        </select>
+
+        <!-- BOTON -->
+        <button class="btn-main">✨ Agregar Producto</button>
+
+    </form>
+
+</div>
+
+<!-- SCRIPT -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const compra = document.getElementById("compra");
+    const ganancia = document.getElementById("ganancia");
+    const venta = document.getElementById("venta");
+    const ventaReal = document.getElementById("venta_real");
+
+    function calcularPrecio() {
+        let c = parseFloat(compra.value) || 0;
+        let g = parseFloat(ganancia.value) || 0;
+
+        let resultado = c + (c * g / 100);
+
+        // redondear a miles
+        let redondeado = Math.ceil(resultado / 1000) * 1000;
+
+        // mostrar bonito
+        venta.value = "$ " + redondeado.toLocaleString("es-CO");
+
+        // valor real para backend
+        ventaReal.value = redondeado;
+    }
+
+    compra.addEventListener("input", calcularPrecio);
+    ganancia.addEventListener("input", calcularPrecio);
+
+});
+</script>
+
+{% endblock %}

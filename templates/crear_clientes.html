@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<h2>👤 Clientes</h2>
+
+<table>
+    <tr>
+        <th>Nombre</th>
+    </tr>
+
+    {% for c in clientes %}
+    <tr>
+        <td>{{ c }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

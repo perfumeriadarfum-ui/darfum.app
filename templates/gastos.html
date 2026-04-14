@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<h2>💸 Gastos</h2>
+
+<!-- BOTÓN -->
+<button class="btn-agregar" onclick="abrirModal()">➕ Agregar gasto</button>
+
+<!-- LISTA -->
+<div class="grid-gastos">
+
+    {% for g in gastos %}
+    <div class="card-gasto">
+
+        <div class="gasto-info">
+            <h3>{{ g[1] }}</h3>
+            <p>${{ "{:,.0f}".format(g[2]) }}</p>
+            <small>{{ g[3] }}</small>
+        </div>
+
+        <form action="/eliminar_gasto/{{ g[0] }}" method="POST">
+            <button class="btn-eliminar">🗑️</button>
+        </form>
+
+    </div>
+    {% endfor %}
+
+</div>
+
+<!-- MODAL -->
+<div id="modalGasto" class="modal">
+
+    <div class="modal-content">
+        <h3>Nuevo gasto</h3>
+
+        <form method="POST" action="/agregar_gasto">
+
+            <input type="date" name="fecha" required>
+            <input type="text" name="descripcion" placeholder="Descripción" required>
+            <input type="number" name="monto" placeholder="Monto" required>
+
+            <select id="categoriaGasto" name="categoria">
+              <option value="">Categoría</option>
+              <option value="arriendo">Arriendo</option>
+              <option value="servicios">Servicios</option>
+              <option value="compras">Compras</option>
+              <option value="otros">Otros</option>
+            </select>
+
+            <select name="metodo_pago">
+                <option value="efectivo">Efectivo</option>
+                <option value="transferencia">Transferencia</option>
+            </select>
+
+            <button type="submit">Guardar</button>
+        </form>
+
+        <button onclick="cerrarModal()">Cancelar</button>
+    </div>
+
+</div>
+
+<script>
+
+function abrirModal(){
+    document.getElementById("modalGasto").style.display = "flex";
+}
+
+function cerrarModal(){
+    document.getElementById("modalGasto").style.display = "none";
+}
+</script>
+
+{% endblock %}

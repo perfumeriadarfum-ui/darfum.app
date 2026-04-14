@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<h2>📒 Cuentas por cobrar</h2>
+
+<div class="grid-cxc">
+
+{% for d in datos %}
+<div class="card-cxc">
+
+    <h3>{{ d.cliente }}</h3>
+
+    <p>💰 Vendido: ${{ "{:,.0f}".format(d.venta) }}</p>
+    <p>💳 Abonado: ${{ "{:,.0f}".format(d.abono) }}</p>
+    <h4>🔴 Deuda: ${{ "{:,.0f}".format(d.deuda) }}</h4>
+
+    <p>📅 Días: {{ d.dias }}</p>
+    <p>{{ d.estado }}</p>
+
+    <button onclick="abrirModal('{{ d.cliente }}')">
+        💵 Abonar
+    </button>
+
+    <button onclick="verHistorial('{{ d.cliente }}')">
+        📜 Historial
+    </button>
+
+</div>
+{% endfor %}
+
+</div>
+
+<!-- MODAL -->
+<div id="modalAbono" class="modal" style="display:none;">
+    <div class="modal-content">
+
+        <h3>Registrar abono</h3>
+
+        <form method="POST" action="/agregar_abono">
+
+            <input type="text" name="cliente" id="clienteAbono" readonly>
+
+            <input type="number" name="monto" placeholder="Monto" required>
+
+            <button type="submit">Guardar</button>
+            <button type="button" onclick="cerrarModal()">Cancelar</button>
+
+        </form>
+
+    </div>
+</div>
+
+<script>
+
+function verHistorial(cliente){
+    window.location.href = "/historial_abonos/" + cliente;
+}
+
+function abrirModal(cliente){
+    document.getElementById("modalAbono").style.display = "flex";
+    document.getElementById("clienteAbono").value = cliente;
+}
+
+function cerrarModal(){
+    document.getElementById("modalAbono").style.display = "none";
+}
+
+</script>
+
+{% endblock %}

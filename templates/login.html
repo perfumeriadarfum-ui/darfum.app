@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="login-body">
+
+<div class="login-container">
+
+    <h1 class="logo">Darfum Elegance</h1>
+    <p class="subtitle">Sistema de Gestión Comercial</p>
+
+    <form method="POST">
+
+        <label>USUARIO</label>
+        <input type="text" name="usuario" placeholder="Nombre de usuario">
+
+        <label>CONTRASEÑA</label>
+        <input type="password" name="password" placeholder="••••••">
+
+        <button class="btn-main">Iniciar Sesión</button>
+
+    </form>
+
+    <p class="info">Acceso por defecto: admin / admin123</p>
+
+</div>
+
+</body>
+</html>

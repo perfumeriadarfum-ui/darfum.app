@@ -1,0 +1,12 @@
+<h1>Usuarios</h1>
+
+<a href="/nuevo_usuario">➕ Nuevo Usuario</a>
+
+{% for u in usuarios %}
+<div>
+    <p>{{ u[1] }} - {{ u[2] }}</p>
+
+    <a href="/editar_usuario/{{ u[0] }}">Editar</a>
+    <a href="/eliminar_usuario/{{ u[0] }}">Eliminar</a>
+</div>
+{% endfor %}

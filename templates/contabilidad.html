@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<h2>📊 Contabilidad</h2>
+
+<div class="card">
+
+    <p>💰 Ventas: ${{ "{:,.0f}".format(ventas or 0).replace(",", ".") }}</p>
+    <p>📄 Cuentas por cobrar: ${{ "{:,.0f}".format(credito or 0).replace(",", ".") }}</p>
+    <p>💸 Gastos: ${{ "{:,.0f}".format(gastos or 0).replace(",", ".") }}</p>
+    <p>🛒 Compras: ${{ "{:,.0f}".format(compras or 0).replace(",", ".") }}</p>
+    <p>💵 Abonos: ${{ "{:,.0f}".format(abonos or 0).replace(",", ".") }}</p>
+
+    <hr>
+
+    <h3>📈 Ganancia: ${{ "{:,.0f}".format(ganancia or 0).replace(",", ".") }}</h3>
+
+    <p>💵 Efectivo: ${{ "{:,.0f}".format(efectivo or 0).replace(",", ".") }}</p>
+    <p>🏦 Bancos: ${{ "{:,.0f}".format(bancos or 0).replace(",", ".") }}</p>
+
+    <h3>🏠 Caja: ${{ "{:,.0f}".format(caja or 0).replace(",", ".") }}</h3>
+
+</div>
+
+<hr>
+
+{% endblock %}

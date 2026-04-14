@@ -1,0 +1,501 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<h1>💰 Ventas</h1>
+
+<div class="ventas-container">
+
+  <h2>🛒 Nueva Venta</h2>
+
+   <!-- BUSCADOR -->
+  <div class="card">
+    <input type="text" id="buscadorProducto" placeholder="🔍 Buscar producto (Ej: OR01)">
+  </div>
+
+  <!-- CARRITO -->
+  <div class="card carrito">
+    <h3>🧾 Carrito</h3>
+    <div id="carrito"></div>
+
+    <div class="total-box">
+      Total: <span id="totalGeneral">$0</span>
+      <button onclick="vaciarCarrito()">Vaciar</button>
+    </div>
+  </div>
+
+    <!-- CLIENTE -->
+  <div class="card">
+    <h3>👤 Cliente</h3>
+    <input type="text" placeholder="Cédula" id="cedula">
+    <input type="text" placeholder="Nombre del cliente" id="nombreCliente">
+    <input type="text" id="telefonoCliente" placeholder="WhatsApp">
+    <div id="mensaje"></div>
+    <button id="btnRegistrar" style="display:none;">
+    ➕ Crear cliente
+    </button>
+        <!-- 👇 ESTO ARREGLA LOS ERRORES -->
+    <div id="resultadoCliente"></div>
+    <div id="infoCliente"></div>
+  </div>
+
+  <!-- TIPO VENTA -->
+  <div class="card">
+    <h3>💳 Tipo de venta</h3>
+
+    <div class="opciones">
+      <button class="opcion activa" data-tipo="contado">Contado</button>
+      <button class="opcion" data-tipo="credito">Crédito</button>
+    </div>
+
+    <select id="metodo_pago">
+      <option value="efectivo">💵 Efectivo</option>
+      <option value="transferencia">🏦 Transferencia</option>
+    </select>
+  </div>
+
+  <div id="opcionesCredito" style="display:none; margin-top:10px;">
+
+    <input type="number" id="cuotas" placeholder="Cuotas">
+    <input type="number" id="inicial" placeholder="Inicial">
+    <input type="date" id="fechaCredito">
+
+    <p id="valorCuota" style="color: #00ffcc;"></p>
+
+</div>
+
+  <!-- BOTÓN FINAL -->
+  <button id="btnRegistrar" class="btn-finalizar" onclick="finalizarVenta()">
+    ✅ Finalizar venta
+  </button>
+
+</div>
+
+<script>
+
+function mostrarAlerta(mensaje) {
+    const div = document.createElement("div");
+    div.innerText = mensaje;
+
+    div.style.position = "fixed";
+    div.style.top = "20px";
+    div.style.right = "20px";
+    div.style.background = "green";
+    div.style.color = "white";
+    div.style.padding = "10px";
+    div.style.borderRadius = "5px";
+
+    document.body.appendChild(div);
+
+    setTimeout(() => {
+        div.remove();
+    }, 3000);
+}
+
+let enviando = false;
+
+function finalizarVenta() {
+    if (enviando) return;
+    enviando = true;
+
+    let total = 0;
+
+    carrito.forEach(item => {
+        total += item.precio * item.cantidad;
+    });
+
+    // 🔥 TIPO DE VENTA CORRECTO
+    let tipoVenta = "contado";
+    let seleccionTipo = document.querySelector(".opcion.activa");
+
+    if (seleccionTipo) {
+        tipoVenta = seleccionTipo.getAttribute("data-tipo");
+    }
+
+    // 🔥 MÉTODO DE PAGO
+    let metodoPago = "efectivo";
+    let seleccionPago = document.querySelector(".opcion-pago.activa");
+
+    if (seleccionPago) {
+        metodoPago = seleccionPago.innerText.toLowerCase();
+    }
+
+    // 🔥 CLIENTE
+    let inputCliente = document.getElementById("nombreCliente");
+    let cliente = inputCliente ? inputCliente.value.trim() : "";
+
+    if (!cliente) {
+        alert("Ingrese el nombre del cliente");
+        enviando = false;
+        return;
+    }
+
+    // 🔥 VALIDAR STOCK
+    for (let item of carrito) {
+        if (item.cantidad > item.stock) {
+            alert("Stock insuficiente para " + item.nombre);
+            enviando = false;
+            return;
+        }
+    }
+
+    // 🔥 DATOS CRÉDITO
+    let fecha_limite = document.getElementById("fechaCredito")?.value || null;
+    let cuotas = document.getElementById("cuotas")?.value || null;
+
+    // 🔥 ENVIAR AL BACKEND
+    fetch("/guardar_venta", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            carrito: carrito,
+            cliente: cliente,
+            total: total,
+            tipo_venta: tipoVenta,
+            metodo_pago: metodoPago,
+            fecha_limite: fecha_limite,
+            cuotas: cuotas
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.ok) {
+            alert("Venta guardada correctamente");
+            location.reload();
+        } else {
+            alert("Error al guardar venta");
+            enviando = false;
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Error del servidor");
+        enviando = false;
+    });
+}
+
+// ================================
+// 📦 PRODUCTOS
+// ================================
+const productos = JSON.parse('{{ productos | tojson | safe }}');
+
+
+// ================================
+// 🔎 ELEMENTOS
+// ================================
+const input = document.getElementById("buscadorProducto");
+const carritoDiv = document.getElementById("carrito");
+const totalGeneralSpan = document.getElementById("totalGeneral");
+
+const cedulaInput = document.getElementById("cedula");
+const nombreInput = document.getElementById("nombreCliente");
+const telefonoInput = document.getElementById("telefonoCliente");
+const btnRegistrar = document.getElementById("btnRegistrar");
+
+btnRegistrar.addEventListener("click", async () => {
+    const cedula = cedulaInput.value.trim();
+    const nombre = nombreInput.value.trim();
+    const celular = telefonoInput.value.trim();
+
+    if (!cedula || !nombre || !celular) {
+        alert("Completa los datos");
+        return;
+    }
+
+    try {
+        const res = await fetch("/crear_cliente", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                cedula: cedula,
+                nombre: nombre,
+                celular: celular
+            })
+        });
+
+        const data = await res.json();
+
+        if (data.ok) {
+            mensaje.innerHTML = "✅ Cliente creado";
+
+            nombreInput.disabled = true;
+            telefonoInput.disabled = true;
+
+            btnRegistrar.style.display = "none";
+        }
+
+    } catch (error) {
+        console.error("Error creando cliente:", error);
+    }
+});
+
+
+// ================================
+// 🧠 CARRITO
+// ================================
+let carrito = [];
+
+
+// ================================
+// 🔎 BUSCAR CLIENTE
+// ================================
+
+const mensaje = document.getElementById("mensaje");
+
+cedulaInput.addEventListener("blur", async () => {
+
+    const cedula = cedulaInput.value;
+
+    const res = await fetch(`/buscar_cliente/${cedula}`);
+    const data = await res.json();
+
+    if (data.encontrado) {
+        nombreInput.value = data.nombre;
+        telefonoInput.value = data.celular || "";
+
+        mensaje.textContent = "Cliente encontrado";
+        mensaje.style.color = "green";
+
+        btnRegistrar.style.display = "none";
+
+    } else {
+        nombreInput.value = "";
+        telefonoInput.value = "";
+
+        mensaje.textContent = "Cliente no registrado";
+        mensaje.style.color = "red";
+
+        btnRegistrar.style.display = "block";
+    }
+
+});
+
+
+// ================================
+// ➕ REGISTRAR CLIENTE
+// ================================
+btnRegistrar.addEventListener("click", async () => {
+
+    const cedula = cedulaInput.value;
+    const nombre = prompt("Nombre del cliente:");
+    const telefono = prompt("Teléfono:");
+
+    if (!nombre || !telefono) return;
+
+    const res = await fetch("/crear_cliente", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cedula, nombre, telefono })
+    });
+
+const data = await res.json();
+
+console.log(data);
+
+if (data.ok) {
+    alert("Cliente registrado ✅");
+
+    nombreInput.value = nombre;
+    telefonoInput.value = telefono;
+
+    btnRegistrar.style.display = "none";
+    mensaje.textContent = "";
+}
+
+});
+
+
+// ================================
+// 🔎 ENTER = AGREGAR PRODUCTO
+// ================================
+input.addEventListener("keydown", function(e) {
+
+    if (e.key === "Enter") {
+
+        e.preventDefault();
+
+        const valor = input.value.trim().toLowerCase();
+        if (!valor) return;
+
+        const producto = productos.find(p => p[1].toLowerCase() === valor);
+
+        if (!producto) {
+            alert("Producto no encontrado");
+            input.value = "";
+            return;
+        }
+
+        agregarAlCarrito(producto);
+        input.value = "";
+    }
+
+});
+
+
+// ================================
+// ➕ AGREGAR
+// ================================
+function agregarAlCarrito(producto) {
+
+    const existe = carrito.find(p => p.id === producto[0]);
+
+    if (existe) {
+
+        // 🚫 VALIDAR STOCK
+        if (existe.cantidad >= existe.stock) {
+            alert("Sin stock disponible ❌");
+            return;
+        }
+
+        existe.cantidad++;
+
+    } else {
+
+        // 🚫 VALIDAR STOCK INICIAL
+        if (producto[4] <= 0) {
+            alert("Producto sin stock ❌");
+            return;
+        }
+
+        carrito.push({
+            id: producto[0],
+            ref: producto[1],
+            nombre: producto[2],
+            precio: producto[3],
+            stock: producto[4],
+            imagen: producto[5] ? producto[5] : "default.png",
+            cantidad: 1
+        });
+    }
+
+    renderCarrito();
+}
+
+
+// ================================
+// 🗑️ RENDER (🔥 CLAVE)
+// ================================
+function renderCarrito() {
+
+    carritoDiv.innerHTML = "";
+    let total = 0;
+
+    carrito.forEach(p => {
+
+        const subtotal = p.precio * p.cantidad;
+        total += subtotal;
+
+        carritoDiv.innerHTML += `
+        <div class="item-carrito">
+
+            <img src="/static/uploads/${p.imagen || 'default.png'}" class="img-carrito">
+
+            <div>
+                <b>${p.nombre}</b><br>
+                $${p.precio.toLocaleString()}
+            </div>
+
+            <div>
+                <button class="btn-restar" data-id="${p.id}">-</button>
+                ${p.cantidad}
+                <button class="btn-sumar" data-id="${p.id}">+</button>
+            </div>
+
+            <div>$${subtotal.toLocaleString()}</div>
+
+            <button class="btn-eliminar" data-id="${p.id}">X</button>
+
+        </div>
+        `;
+    });
+
+    totalGeneralSpan.textContent = total.toLocaleString();
+}
+
+
+// ================================
+// 🖱️ EVENTOS BOTONES
+// ================================
+document.addEventListener("click", function(e) {
+
+    const id = e.target.getAttribute("data-id");
+
+    if (e.target.classList.contains("btn-sumar")) {
+        const p = carrito.find(p => String(p.id) === String(id));
+        if (p) p.cantidad++;
+        renderCarrito();
+    }
+
+    if (e.target.classList.contains("btn-restar")) {
+        const p = carrito.find(p => String(p.id) === String(id));
+        if (p && p.cantidad > 1) {
+            p.cantidad--;
+        }
+        renderCarrito();
+    }
+
+    if (e.target.classList.contains("btn-eliminar")) {
+        carrito = carrito.filter(p => String(p.id) !== String(id));
+        renderCarrito();
+    }
+
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const opcionesCredito = document.getElementById("opcionesCredito");
+  const fechaInput = document.getElementById("fechaCredito");
+
+  // fecha automática
+  if (fechaInput) {
+    const hoy = new Date().toISOString().split("T")[0];
+    fechaInput.value = hoy;
+  }
+
+  document.querySelectorAll(".opcion").forEach(op => {
+    op.addEventListener("click", () => {
+
+      document.querySelectorAll(".opcion").forEach(o => 
+        o.classList.remove("activa")
+      );
+
+      op.classList.add("activa");
+
+      const tipo = op.dataset.tipo;
+
+      if (tipo === "credito") {
+        if (opcionesCredito) opcionesCredito.style.display = "block";
+        if (fechaInput) fechaInput.style.display = "block";
+      } else {
+        if (opcionesCredito) opcionesCredito.style.display = "none";
+        if (fechaInput) fechaInput.style.display = "none";
+      }
+
+    });
+  });
+
+});
+
+
+// CLICK MÉTODO DE PAGO
+document.querySelectorAll(".opcion-pago").forEach(op => {
+    op.addEventListener("click", () => {
+        document.querySelectorAll(".opcion-pago").forEach(o => o.classList.remove("activa"));
+        op.classList.add("activa");
+    });
+});
+
+
+function vaciarCarrito() {
+  carrito = [];
+  document.getElementById("carrito").innerHTML = "";
+  document.getElementById("totalGeneral").innerText = "$0";
+}
+
+</script>
+
+{% endblock %}

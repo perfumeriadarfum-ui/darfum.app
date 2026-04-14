@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<h2>⚖️ Ajustes de Caja</h2>
+
+<button onclick="abrirModal()" class="btn-agregar">
+    ➕ Nuevo ajuste
+</button>
+
+<div class="grid-ajustes">
+
+    {% for a in ajustes %}
+    <div class="card-ajuste">
+
+        <h3>{{ a[1] }}</h3>
+        <p>${{ "{:,.0f}".format(a[2]) }}</p>
+        <small>{{ a[3] }}</small>
+        <br>
+        <small>{{ a[4] }}</small>
+
+    </div>
+    {% endfor %}
+
+</div>
+
+<!-- MODAL -->
+<div id="modalAjuste" class="modal">
+
+    <div class="modal-content">
+
+        <h3>Nuevo ajuste</h3>
+
+        <form method="POST" action="/agregar_ajuste">
+
+            <select name="tipo">
+                <option value="ingreso">➕ Sumar dinero</option>
+                <option value="egreso">➖ Restar dinero</option>
+            </select>
+
+            <input type="number" name="monto" placeholder="Monto" required>
+            <input type="text" name="motivo" placeholder="Motivo" required>
+
+            <button type="submit">Guardar</button>
+
+        </form>
+
+        <button onclick="cerrarModal()">Cancelar</button>
+
+    </div>
+
+</div>
+
+<script>
+function abrirModal(){
+    document.getElementById("modalAjuste").style.display = "flex";
+}
+
+function cerrarModal(){
+    document.getElementById("modalAjuste").style.display = "none";
+}
+</script>
+
+{% endblock %}

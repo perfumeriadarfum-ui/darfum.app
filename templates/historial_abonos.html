@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<h2>Historial de abonos - {{ cliente }}</h2>
+
+<table>
+    <tr>
+        <th>Monto</th>
+        <th>Fecha</th>
+    </tr>
+
+    {% for a in abonos %}
+    <tr>
+        <td>${{ a[0] }}</td>
+        <td>{{ a[1] }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% if not abonos %}
+<p>No hay abonos registrados</p>
+{% endif %}
+
+{% endblock %}
