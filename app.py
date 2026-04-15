@@ -16,7 +16,7 @@ if not os.path.exists(UPLOAD_FOLDER):
 
 # ✅ BASE DE DATOS (UNA SOLA RUTA FIJA)
 def get_db_path():
-    BASE_DIR = os.path.dirname(os.path.abspath(_file_))
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     db_path = os.path.join(BASE_DIR, "darfum.db")
 
     conn = sqlite3.connect(db_path, check_same_thread=False)
